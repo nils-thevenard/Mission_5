@@ -1,0 +1,38 @@
+version: "3"
+services:
+    db:
+        image: mongo
+        expose:
+            - 27017
+        volumes:
+            - db-volume:/data/db
+        ports:
+            - "27017:27017"
+    server:
+        build:
+            context: ./server
+        environment:
+            - MONGO_URI=mongodb://db:27017
+        ports:
+            - "4000:4000"
+        depends_on:
+            - db
+        volumes:
+            - ./server:/app
+            - /app/node_modules
+        restart: on-failure
+    client:
+        build:
+            context: ./client
+        environment:
+            - VITE_API_ENDPOINT=http://localhost:4000
+        ports:
+            - "5173:5173"
+        depends_on:
+            - server
+        # volumes:
+        #     - ./client:/app
+        #     - /app/node_modules
+
+volumes:
+    db-volume:
